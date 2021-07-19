@@ -1,4 +1,5 @@
 use merk::verify;
+use merk::execute_proof;
 
 fn main() {
     let ops = [3, 1, 5, 0, 1, 5];
@@ -13,4 +14,14 @@ fn main() {
         map.get(vec![5].as_slice()).unwrap().unwrap(),
         vec![5].as_slice()
     );
+
+    let execute_proof_result = execute_proof(&ops);
+
+    assert_eq!(execute_proof_result.unwrap().0, hash);
+
+    assert_eq!(
+        map.get(vec![5].as_slice()).unwrap().unwrap(),
+        vec![5].as_slice()
+    );
 }
+
