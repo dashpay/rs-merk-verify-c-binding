@@ -20,7 +20,7 @@ pub struct ExecuteProofResult {
 }
 
 #[no_mangle]
-pub extern "C" fn execute_proof_c(c_array: *const u8, length: usize) -> *ExecuteProofResult {
+pub extern "C" fn execute_proof_c(c_array: *const u8, length: usize) -> *const ExecuteProofResult {
     let rust_array: &[u8] = unsafe { slice::from_raw_parts(c_array, length as usize) };
     let execute_proof_result = execute_proof(rust_array);
     match execute_proof_result {
