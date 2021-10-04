@@ -6,7 +6,7 @@ use std::ptr;
 pub struct Element {
     pub key_length: usize,
     pub key: *mut u8, //32 bytes
-    pub bool: bool, //1 byte
+    pub exists: bool, //1 byte
     pub value_length: usize, //8 bytes
     pub value: *mut u8, //value_length bytes
 }
@@ -29,7 +29,7 @@ pub extern fn execute_proof_c(c_array: *const u8, length: usize) -> *mut Execute
                 let element = Element {
                     key_length: key_slice.len(),
                     key: key_slice.as_mut_ptr(),
-                    bool: *exists,
+                    exists: *exists,
                     value_length: value_slice.len(),
                     value: value_slice.as_mut_ptr()
                 };
