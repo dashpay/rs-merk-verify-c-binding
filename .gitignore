@@ -2,3 +2,4 @@
 /.idea
 rs-merk-verify-c-binding.iml
 Cargo.lock
+.DS_Store
