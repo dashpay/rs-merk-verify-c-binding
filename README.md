@@ -1,6 +1,13 @@
 # rs-merk-verify-c-binding
 Merk verification for C and iOS/MacOS
 
+###### Prerequisites:
+```
+cargo install cargo-lipo
+rustup +nightly target add aarch64-apple-ios
+rustup +nightly target add x86_64-apple-ios
+```
+
 ###### Create universal binary (iOS): 
 ```
 cargo +nightly lipo --release
