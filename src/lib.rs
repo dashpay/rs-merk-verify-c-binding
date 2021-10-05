@@ -2,6 +2,7 @@ use merk::execute_proof;
 use std::slice;
 use std::mem;
 use std::ptr;
+
 #[repr(C)]
 pub struct Element {
     pub key_length: usize,
@@ -10,12 +11,14 @@ pub struct Element {
     pub value_length: usize, //8 bytes
     pub value: *mut u8, //value_length bytes
 }
+
 #[repr(C)]
 pub struct ExecuteProofResult {
     pub hash: *mut [u8; 32],  //32 bytes
     pub element_count: usize,  //8 bytes
     pub elements: *mut *mut Element, //sizeof(pointer)
 }
+
 #[no_mangle]
 pub extern fn execute_proof_c(c_array: *const u8, length: usize) -> *mut ExecuteProofResult {
     let rust_array: &[u8] = unsafe { slice::from_raw_parts(c_array, length as usize) };
@@ -47,6 +50,7 @@ pub extern fn execute_proof_c(c_array: *const u8, length: usize) -> *mut Execute
         }
     }
 }
+
 #[no_mangle]
 pub unsafe extern fn destroy_proof_c(proof_result: *mut ExecuteProofResult) {
     let result = Box::from_raw(proof_result);
