@@ -19,33 +19,49 @@ pub struct ExecuteProofResult {
     pub elements: *mut *mut Element, //sizeof(pointer)
 }
 
+fn vec_to_raw_pointer<T>(mut vec: Vec<T>) -> *mut T {
+    // Take the pointer
+    let pointer = vec.as_mut_ptr();
+
+    // Release the ownership
+    // mem::forget releases ownership without deallocating memory.
+    // This essentially gives the ownership to the c caller. Rust needs to get
+    // the pointer to the struct back in order to properly discard it later.
+    mem::forget(vec);
+
+    // Return the pointer
+    pointer
+}
+
 #[no_mangle]
 pub extern fn execute_proof_c(c_array: *const u8, length: usize) -> *mut ExecuteProofResult {
-    let rust_array: &[u8] = unsafe { slice::from_raw_parts(c_array, length as usize) };
+    let rust_array: &[u8] = unsafe {
+        slice::from_raw_parts(c_array, length as usize)
+    };
+
     let execute_proof_result = execute_proof(rust_array);
+
     match execute_proof_result {
         Err(_) => ptr::null_mut(),
         Ok((hash, map)) => {
-            let elements_map = map.all().map(|(key, (exists, value))| {
-                let mut key_slice = key.to_vec().into_boxed_slice();
-                let mut value_slice = value.to_vec().into_boxed_slice();
+            let elements: Vec<*mut Element> = map.all().map(|(key, (exists, value))| {
                 let element = Element {
-                    key_length: key_slice.len(),
-                    key: key_slice.as_mut_ptr(),
+                    key_length: key.len(),
+                    key: vec_to_raw_pointer(key.clone()),
                     exists: *exists,
-                    value_length: value_slice.len(),
-                    value: value_slice.as_mut_ptr()
+                    value_length: value.len(),
+                    value: vec_to_raw_pointer(value.clone())
                 };
+
                 Box::into_raw(Box::new(element))
-            });
-            let a:Vec<*mut Element> = elements_map.collect();
-            let mut elements_slice = a.into_boxed_slice();
+            }).collect();
+
             let result = ExecuteProofResult {
                 hash: Box::into_raw(Box::new(hash)),
-                element_count: elements_slice.len(),
-                elements: elements_slice.as_mut_ptr()
+                element_count: elements.len(),
+                elements: vec_to_raw_pointer(elements),
             };
-            mem::forget(elements_slice);
+
             Box::into_raw(Box::new(result))
         }
     }

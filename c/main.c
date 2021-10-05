@@ -32,7 +32,13 @@ int main (void) {
     Element *first_element = result->elements[0];
     char *element_hex = bin2hex(first_element->value, 128);
 
+    char *expected_value_hex = "01000000a462696458206c05f39cee3a2c1436b61a0746503a743658b2d0e76b432e741f9bbbe211dc346762616c616e63651a3b9ac7f4687265766973696f6e006a7075626c69634b65797381a36269640064646174615821032d6d975393f17c0d605efe8562c06cbfc913afcc73d0d855399c0a97d7761540647479706500";
+
     printf("element_value: \n");
     printf("%s", element_hex);
+    printf("\n");
+
+    printf("expected element_value: \n");
+    printf("%s", expected_value_hex);
     printf("\n");
 }
