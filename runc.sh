@@ -1,3 +1,3 @@
 cargo +nightly build --release &&
-gcc -o ./c/build/main ./c/main.c -Isrc  -L. -l:target/release/libmerk_ios.so &&
+gcc ./c/main.c -o ./c/build/main -Itarget -Ltarget/release -lmerk_ios &&
 ./c/build/main
