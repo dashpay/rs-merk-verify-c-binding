@@ -12,3 +12,4 @@ Cargo.lock
 /c/libmerk_ffi_test.cbp
 /c/bin/
 .DS_Store
+/c/Testing/
