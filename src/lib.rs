@@ -6,7 +6,7 @@ use std::ptr;
 #[repr(C)]
 pub struct Element {
     pub key_length: usize,
-    pub key: *mut u8, //32 bytes
+    pub key: *mut u8,
     pub exists: bool, //1 byte
     pub value_length: usize, //8 bytes
     pub value: *mut u8, //value_length bytes
@@ -14,9 +14,24 @@ pub struct Element {
 
 #[repr(C)]
 pub struct ExecuteProofResult {
+    pub valid: bool,
     pub hash: *mut [u8; 32],  //32 bytes
     pub element_count: usize,  //8 bytes
     pub elements: *mut *mut Element, //sizeof(pointer)
+}
+
+#[repr(C)]
+pub struct Query {
+    pub key_length: usize,
+    pub key: *mut u8,
+    pub key_end_length: usize, //if range query, not 0
+    pub key_end: *mut u8,
+}
+
+#[repr(C)]
+pub struct Keys {
+    pub element_count: usize,  //8 bytes
+    pub elements: *mut *mut Query, //sizeof(pointer)
 }
 
 fn vec_to_raw_pointer<T>(mut vec: Vec<T>) -> *mut T {
@@ -42,7 +57,16 @@ pub extern fn execute_proof_c(c_array: *const u8, length: usize) -> *mut Execute
     let execute_proof_result = execute_proof(rust_array);
 
     match execute_proof_result {
-        Err(_) => ptr::null_mut(),
+        Err(_) => {
+            let result = ExecuteProofResult {
+                valid: false,
+                hash: ptr::null_mut(),
+                element_count: 0,
+                elements: ptr::null_mut(),
+            };
+
+            Box::into_raw(Box::new(result))
+        },
         Ok((hash, map)) => {
             let elements: Vec<*mut Element> = map.all().map(|(key, (exists, value))| {
                 let element = Element {
@@ -57,6 +81,96 @@ pub extern fn execute_proof_c(c_array: *const u8, length: usize) -> *mut Execute
             }).collect();
 
             let result = ExecuteProofResult {
+                valid: true,
+                hash: Box::into_raw(Box::new(hash)),
+                element_count: elements.len(),
+                elements: vec_to_raw_pointer(elements),
+            };
+
+            Box::into_raw(Box::new(result))
+        }
+    }
+}
+
+#[no_mangle]
+pub extern fn execute_proof_query_keys_c(c_array: *const u8, length: usize, query_keys: *const Keys) -> *mut ExecuteProofResult {
+    let rust_array: &[u8] = unsafe {
+        slice::from_raw_parts(c_array, length as usize)
+    };
+
+    let execute_proof_result = execute_proof(rust_array);
+
+    let key_count;
+    unsafe {
+        key_count = (*query_keys).element_count;
+    }
+
+    match execute_proof_result {
+        Err(_) => {
+            let result = ExecuteProofResult {
+                valid: false,
+                hash: ptr::null_mut(),
+                element_count: 0,
+                elements: ptr::null_mut(),
+            };
+
+            Box::into_raw(Box::new(result))
+        },
+        Ok((hash, map)) => {
+            let mut elements: Vec<*mut Element> = vec![];
+            let mut has_error: bool = false;
+            for i in 0..key_count {
+                let key: &[u8];
+                let key_end: &[u8];
+                let mut is_range = false;
+                unsafe {
+                    let query_element = *((*query_keys).elements.offset(i as isize));
+                    key = std::slice::from_raw_parts((*query_element).key, (*query_element).key_length);
+                    if (*query_element).key_end_length > 0 {
+                        // This is a range query
+                        is_range = true;
+                        key_end = std::slice::from_raw_parts((*query_element).key_end, (*query_element).key_end_length);
+                    }
+                }
+                if is_range {
+                    let elements: Vec<*mut Element> = map.range(key..key_end).map(|(map, start_key, iter, prev_key)| {
+
+                    }).collect();
+                } else {
+                    match map.get(key) {
+                        Ok(option) => {
+                            match option {
+                                None => {
+                                    let element = Element {
+                                        key_length: key.len(),
+                                        key: vec_to_raw_pointer(Vec::from(key.clone())),
+                                        exists: false,
+                                        value_length: 0,
+                                        value: ptr::null_mut()
+                                    };
+                                    elements.push(Box::into_raw(Box::new(element)))
+                                }
+                                Some(value) => {
+                                    let element = Element {
+                                        key_length: key.len(),
+                                        key: vec_to_raw_pointer(Vec::from(key.clone())),
+                                        exists: true,
+                                        value_length: value.len(),
+                                        value: vec_to_raw_pointer(Vec::from(value.clone()))
+                                    };
+                                    elements.push(Box::into_raw(Box::new(element)))
+                                }
+                            }
+                        }
+                        Err(_) => {
+                            has_error |= true;
+                        }
+                    }
+                }
+            }
+
+            let result = ExecuteProofResult {
+                valid: has_error,
                 hash: Box::into_raw(Box::new(hash)),
                 element_count: elements.len(),
                 elements: vec_to_raw_pointer(elements),
