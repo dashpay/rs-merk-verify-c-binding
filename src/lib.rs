@@ -100,9 +100,9 @@ pub extern fn execute_proof_query_keys_c(c_array: *const u8, length: usize, quer
 
     let execute_proof_result = execute_proof(rust_array);
 
-    let key_count;
+    let query_count;
     unsafe {
-        key_count = (*query_keys).element_count;
+        query_count = (*query_keys).element_count;
     }
 
     match execute_proof_result {
@@ -119,51 +119,62 @@ pub extern fn execute_proof_query_keys_c(c_array: *const u8, length: usize, quer
         Ok((hash, map)) => {
             let mut elements: Vec<*mut Element> = vec![];
             let mut has_error: bool = false;
-            for i in 0..key_count {
-                let key: &[u8];
-                let key_end: &[u8];
-                let mut is_range = false;
+            for i in 0..query_count {
                 unsafe {
                     let query_element = *((*query_keys).elements.offset(i as isize));
-                    key = std::slice::from_raw_parts((*query_element).key, (*query_element).key_length);
+                    let key = std::slice::from_raw_parts((*query_element).key, (*query_element).key_length);
+                    // Queries can either be for a key or for a range
                     if (*query_element).key_end_length > 0 {
                         // This is a range query
-                        is_range = true;
-                        key_end = std::slice::from_raw_parts((*query_element).key_end, (*query_element).key_end_length);
-                    }
-                }
-                if is_range {
-                    let elements: Vec<*mut Element> = map.range(key..key_end).map(|(map, start_key, iter, prev_key)| {
-
-                    }).collect();
-                } else {
-                    match map.get(key) {
-                        Ok(option) => {
-                            match option {
-                                None => {
+                        let key_end = std::slice::from_raw_parts((*query_element).key_end, (*query_element).key_end_length);
+                        let mut range_elements: Vec<*mut Element> = map.range(key..key_end).map(|result| {
+                            match result {
+                                Ok(tuple) => {
                                     let element = Element {
-                                        key_length: key.len(),
-                                        key: vec_to_raw_pointer(Vec::from(key.clone())),
-                                        exists: false,
-                                        value_length: 0,
-                                        value: ptr::null_mut()
-                                    };
-                                    elements.push(Box::into_raw(Box::new(element)))
-                                }
-                                Some(value) => {
-                                    let element = Element {
-                                        key_length: key.len(),
-                                        key: vec_to_raw_pointer(Vec::from(key.clone())),
+                                        key_length: tuple.0.len(),
+                                        key: vec_to_raw_pointer(Vec::from(tuple.0.clone())),
                                         exists: true,
-                                        value_length: value.len(),
-                                        value: vec_to_raw_pointer(Vec::from(value.clone()))
+                                        value_length: tuple.1.len(),
+                                        value: vec_to_raw_pointer(Vec::from(tuple.1.clone()))
                                     };
-                                    elements.push(Box::into_raw(Box::new(element)))
+                                    Box::into_raw(Box::new(element))
+                                }
+                                Err(_) => {
+                                    has_error = true;
+                                    ptr::null_mut()
                                 }
                             }
-                        }
-                        Err(_) => {
-                            has_error |= true;
+                        }).collect();
+                        elements.append(&mut range_elements);
+                    } else {
+                        match map.get(key) {
+                            Ok(option) => {
+                                match option {
+                                    None => {
+                                        let element = Element {
+                                            key_length: key.len(),
+                                            key: vec_to_raw_pointer(Vec::from(key.clone())),
+                                            exists: false,
+                                            value_length: 0,
+                                            value: ptr::null_mut()
+                                        };
+                                        elements.push(Box::into_raw(Box::new(element)))
+                                    }
+                                    Some(value) => {
+                                        let element = Element {
+                                            key_length: key.len(),
+                                            key: vec_to_raw_pointer(Vec::from(key.clone())),
+                                            exists: true,
+                                            value_length: value.len(),
+                                            value: vec_to_raw_pointer(Vec::from(value.clone()))
+                                        };
+                                        elements.push(Box::into_raw(Box::new(element)))
+                                    }
+                                }
+                            }
+                            Err(_) => {
+                                has_error = true;
+                            }
                         }
                     }
                 }
