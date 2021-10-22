@@ -2,4 +2,14 @@
 /.idea
 rs-merk-verify-c-binding.iml
 Cargo.lock
+/c/CMakeCache.txt
+/c/Makefile
+/c/cmake_install.cmake
+/c/cmake-build-debug/
+/c/CMakeFiles/
+/c/build/
+/c/Project.cbp
+/c/libmerk_ffi_test.cbp
+/c/bin/
 .DS_Store
+/c/Testing/
