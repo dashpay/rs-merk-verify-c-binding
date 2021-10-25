@@ -85,7 +85,13 @@ int main (void) {
 
     unsigned char *proof_bin_5_160bit_hashes = hex2bin(proof_hex_5_160bit_hashes);
 
-    ExecuteProofResult *result2 = execute_proof_query_keys_c(proof_bin, 1976 / 2, keys);
+    ExecuteProofResult *result3 = execute_proof_query_keys_c(proof_bin_5_160bit_hashes, 1976 / 2, keys);
 
+    printf("--------------\n5 hashes\n--------------\n");
+    printf("valid: \n");
+    printf("%d\n", result3->valid);
 
+    printf("element_count: \n");
+    printf("%lu", result3->element_count);
+    printf("\n");
 }
