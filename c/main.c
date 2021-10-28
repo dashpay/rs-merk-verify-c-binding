@@ -66,6 +66,12 @@ int main (void) {
     query3->key_length = 20;
     query4->key_length = 20;
 
+    query0->key_end_length = 0;
+    query1->key_end_length = 0;
+    query2->key_end_length = 0;
+    query3->key_end_length = 0;
+    query4->key_end_length = 0;
+
     query0->key = queryKeyBin0;
     query1->key = queryKeyBin1;
     query2->key = queryKeyBin2;

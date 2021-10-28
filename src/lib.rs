@@ -181,7 +181,7 @@ pub extern fn execute_proof_query_keys_c(c_array: *const u8, length: usize, quer
             }
 
             let result = ExecuteProofResult {
-                valid: has_error,
+                valid: !has_error,
                 hash: Box::into_raw(Box::new(hash)),
                 element_count: elements.len(),
                 elements: vec_to_raw_pointer(elements),
