@@ -8,6 +8,7 @@ fn main() {
         123, 215, 130, 95, 215, 226, 166, 136, 61, 174, 227, 43,
     ];
 
+
     let map = verify(&ops, hash).unwrap();
 
     assert_eq!(
