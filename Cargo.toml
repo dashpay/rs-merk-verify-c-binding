@@ -19,4 +19,4 @@ name = "merk_ios"
 crate-type = ["staticlib", "cdylib"]      # Creates dynamic lib
 
 [build-dependencies]
-cbindgen = "0.19"
+cbindgen = "0.20.0"
