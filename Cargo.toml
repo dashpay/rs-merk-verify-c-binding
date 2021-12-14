@@ -15,8 +15,8 @@ default-features = false
 
 
 [lib]
-name = "merk_ios"
 crate-type = ["staticlib", "cdylib"]      # Creates dynamic lib
+name = "merk"
 
 [build-dependencies]
 cbindgen = "0.20.0"
