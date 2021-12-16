@@ -9,7 +9,7 @@ publish = false
 
 [dependencies.merk]
 git = "https://github.com/dashevo/merk"
-branch = "v0.1-dev"
+branch = "0.1-dev-stable"
 features = ["verify"]
 default-features = false
 
