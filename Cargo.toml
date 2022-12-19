@@ -1,25 +1,27 @@
 [package]
-name = "rs-merk-verify-c-binding"
-version = "0.1.3"
-edition = "2018"
+name = "rs-grovedb-verify-c-binding"
+version = "0.2.0"
+authors = ["Samuel Westrich <sam@dash.org>"]
+edition = "2021"
+license = "MIT"
 build = "build.rs"
 publish = false
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies.merk]
-git = "https://github.com/dashevo/merk"
-branch = "v0.1-dev-stable"
+git = "https://github.com/dashevo/grovedb"
+branch = "master"
 features = ["verify"]
 default-features = false
 
 
 [lib]
-name = "merk"
+name = "grovedb"
 #crate-type = ["staticlib", "cdylib"]      # Creates dynamic lib
 
 [build-dependencies]
-cbindgen = "0.20.0"
+cbindgen = "0.24.3"
 
 [profile.release]
 lto = "thin"

@@ -4,19 +4,19 @@ Merk verification for C and iOS/MacOS
 ###### Prerequisites:
 ```
 cargo install cargo-lipo
-rustup +nightly target add aarch64-apple-ios
-rustup +nightly target add x86_64-apple-ios
+rustup target add aarch64-apple-ios
+rustup target add x86_64-apple-ios
 ```
 
 ###### Create universal binary (iOS): 
 ```
-cargo +nightly lipo --release
+cargo lipo --release
 ```
 
 ###### Create MacOS version:
 ```
-cargo +nightly build --target=x86_64-apple-darwin --release
-cargo +nightly build --target=aarch64-apple-darwin --release
+cargo build --target=x86_64-apple-darwin --release
+cargo build --target=aarch64-apple-darwin --release
 lipo -create target/aarch64-apple-darwin/release/libmerk_ios.a target/x86_64-apple-darwin/release/libmerk_ios.a -output target/universal/release/libmerkMacOS.a
 ```
 
