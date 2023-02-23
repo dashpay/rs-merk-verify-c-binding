@@ -1,5 +1,3 @@
-use merk::verify;
-use merk::execute_proof;
 
 fn main() {
     let ops = [3, 1, 5, 0, 1, 5];

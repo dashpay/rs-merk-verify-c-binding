@@ -1,7 +1,7 @@
-use merk::execute_proof;
 use std::slice;
 use std::mem;
 use std::ptr;
+use grovedb::Proof;
 
 #[repr(C)]
 pub struct Element {

@@ -4,13 +4,13 @@ version = "0.2.0"
 authors = ["Samuel Westrich <sam@dash.org>"]
 edition = "2021"
 license = "MIT"
-build = "build.rs"
+# build = "build.rs"
 publish = false
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies.merk]
-git = "https://github.com/dashevo/grovedb"
+git = "https://github.com/dashpay/grovedb"
 branch = "master"
 features = ["verify"]
 default-features = false
